@@ -1,9 +1,14 @@
-# Tangled.sh Knot Server running locally
+# Tangled Knot Server in Docker
+
+[Tangled](https://tangled.sh) is a git platform on top of the [AT Protocol](https://atproto.com), with the "knot servers" being where repositories are stored rather than [the user PDS](https://github.com/bluesky-social/pds). As such, this is a Dockerised form of [the official knot server](https://tangled.sh/@tangled.sh/core). It is not affiliated with the developers of Tangled or the AT Protocol.
 
 ## Prerequisites
 
 1. **Docker**: Ensure Docker is installed on your system. You can download and install Docker from [here](https://docs.docker.com/get-docker/).
 2. **Docker Compose**: Ensure Docker Compose is installed. Docker Compose is included with Docker Desktop, or you can install it separately by following the instructions [here](https://docs.docker.com/compose/install/).
+
+### Optional
+
 3. **Cloudflare Tunnel**: Ensure you have a Cloudflare Tunnel set up and configured via the Cloudflare web interface.
 
 ## Running yourself
@@ -31,6 +36,8 @@
 4. The server will be accessible on the ports defined in the `docker-compose.yml` file:
     - Knot Server: `http://your.local.server:5555`
     - Internal Listen Address: `127.0.0.1:5444`
+
+### If routing through a Cloudflare Tunnel
 
 5. Access the server through your existing Cloudflare Tunnel:
     - Ensure your Cloudflare Tunnel is configured to route traffic to `http://your.local.server:5555`.
