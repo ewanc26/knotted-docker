@@ -5,3 +5,8 @@ services:
     ports:
       - "5555:5555"
       - "5444:5444"
+    volumes:
+      - knot_data:/knot
+
+volumes:
+  knot_data:
