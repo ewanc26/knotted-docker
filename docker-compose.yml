@@ -1,0 +1,7 @@
+services:
+  knot:
+    build: .
+    env_file: .local.env
+    ports:
+      - "5555:5555"
+      - "5444:5444"

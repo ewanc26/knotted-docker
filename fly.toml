@@ -1,0 +1,40 @@
+# fly.toml app configuration file generated for knot on 2025-03-10T12:05:29Z
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'knot'
+primary_region = 'lhr'
+
+[build]
+
+[env]
+APPVIEW_ENDPOINT = 'https://tangled.sh'
+KNOT_REPO_SCAN_PATH = '/home/git'
+KNOT_SERVER_HOSTNAME = 'knot.fly.dev'
+KNOT_SERVER_INTERNAL_LISTEN_ADDR = '127.0.0.1:5444'
+KNOT_SERVER_LISTEN_ADDR = '0.0.0.0:5555'
+
+[http_service]
+internal_port = 5555
+force_https = true
+auto_stop_machines = 'stop'
+auto_start_machines = true
+min_machines_running = 0
+processes = ['app']
+
+[[vm]]
+memory = '512mb'
+cpu_kind = 'shared'
+cpus = 1
+
+[[mounts]]
+destination = "/home/git"
+source = "knot_data"
+
+# ssh traffic
+[[services]]
+internal_port = 22
+protocol = "tcp"
+[[services.ports]]
+port = 22
