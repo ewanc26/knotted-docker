@@ -15,16 +15,17 @@
     cd knotted-docker
     ```
 
-2. Edit `.local.env` to point to your local server's hostname:
+2. Edit `.local.env` to point to your local server's hostname and update the secret:
 
     ```env
     KNOT_SERVER_HOSTNAME=your.local.server
+    KNOT_SERVER_SECRET=secret
     ```
 
-3. Build and run the Docker containers using `docker compose`:
+3. Build and run the Docker containers in the background using `docker compose`:
 
     ```sh
-    docker compose up --build
+    docker compose up --build -d
     ```
 
 4. The server will be accessible on the ports defined in the `docker-compose.yml` file:
