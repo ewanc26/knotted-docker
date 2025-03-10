@@ -16,7 +16,7 @@ RUN export CGO_ENABLED=1 && \
 FROM debian:bookworm-slim
 
 RUN apt-get update && \
-    apt-get install -y ca-certificates openssh-client openssh-server && \
+    apt-get install -y openssh-client openssh-server && \
     rm -rf /var/lib/apt/lists/*
 
 # Copy binaries
