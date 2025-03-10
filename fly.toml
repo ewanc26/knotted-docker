@@ -10,7 +10,7 @@ primary_region = 'lhr'
 
 [env]
 APPVIEW_ENDPOINT = 'https://tangled.sh'
-KNOT_REPO_SCAN_PATH = '/home/git'
+KNOT_REPO_SCAN_PATH = '/knot/git'
 KNOT_SERVER_HOSTNAME = 'knot.fly.dev'
 KNOT_SERVER_INTERNAL_LISTEN_ADDR = '127.0.0.1:5444'
 KNOT_SERVER_LISTEN_ADDR = '0.0.0.0:5555'
@@ -29,7 +29,7 @@ cpu_kind = 'shared'
 cpus = 1
 
 [[mounts]]
-destination = "/home/git"
+destination = "/knot"
 source = "knot_data"
 
 # ssh traffic

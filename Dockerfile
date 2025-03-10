@@ -33,8 +33,8 @@ RUN mkdir -p /etc/ssh/sshd_config.d && \
     > /etc/ssh/sshd_config.d/authorized_keys_command.conf
 
 # Create git user and deploy repoguard
-RUN useradd -m -d /home/git -s /bin/bash git && \
-    cp /repoguard /home/git/ && chown git:git /home/git/repoguard
+RUN useradd -m -d /knot/git -s /bin/bash git && \
+    cp /repoguard /knot/git/ && chown git:git /knot/git/repoguard
 
 # Expose necessary ports
 EXPOSE 5555 5444
