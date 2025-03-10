@@ -39,7 +39,5 @@ RUN useradd -m -d /knot/git -s /bin/bash git && \
 # Expose necessary ports
 EXPOSE 5555 5444
 
-ENV DB_PATH=/knot_data/knotserver.db
-
 # Set command to start the knot server
 CMD ["/usr/local/bin/knotserver"]
