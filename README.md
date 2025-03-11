@@ -1,98 +1,181 @@
 # Tangled Knot Server in Docker
 
-[Tangled](https://tangled.sh) is a git platform on top of the [AT Protocol](https://atproto.com), with the "knot servers" being where repositories are stored rather than [the user PDS](https://github.com/bluesky-social/pds). As such, this is a Dockerised form of [the official knot server](https://tangled.sh/@tangled.sh/core). It is not affiliated with the developers of Tangled or the AT Protocol.
+[Tangled](https://tangled.sh) is a git platform built on the [AT Protocol](https://atproto.com), with "knot servers" serving as repositories rather than [the user PDS](https://github.com/bluesky-social/pds). This Dockerized version of the [official knot server](https://tangled.sh/@tangled.sh/core) is unaffiliated with the developers of Tangled or the AT Protocol.
 
 ## Prerequisites
 
-1. **Docker**: Ensure Docker is installed on your system. You can download and install Docker from [here](https://docs.docker.com/get-docker/).
-2. **Docker Compose**: Ensure Docker Compose is installed. Docker Compose is included with Docker Desktop, or you can install it separately by following the instructions [here](https://docs.docker.com/compose/install/).
+1. **Docker**: Ensure Docker is installed on your system. You can download and install Docker from [here](https://docs.docker.com/get-docker/). For a comprehensive introduction to Docker, consider watching the following tutorial:
 
-### Optional
+   [Docker Tutorial for Beginners](https://www.youtube.com/watch?v=3c-iBn73dDE)
 
-3. **Cloudflare Tunnel**: Ensure you have a Cloudflare Tunnel set up and configured via the Cloudflare web interface.
+2. **Docker Compose**: Verify that Docker Compose is installed. Docker Compose is included with Docker Desktop, or you can install it separately by following the instructions [here](https://docs.docker.com/compose/install/).
 
-## Running yourself
+3. **Cloudflare Tunnel**: If you plan to route your server through a Cloudflare Tunnel, install and configure `cloudflared` on your Ubuntu server.
+
+### Installing and Configuring Cloudflared (Ubuntu)
+
+1. **Install `cloudflared`**
+
+   ```sh
+   curl -fsSL https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -o cloudflared
+   chmod +x cloudflared
+   sudo mv cloudflared /usr/local/bin/
+   ```
+
+2. **Authenticate Cloudflare Tunnel**
+
+   ```sh
+   cloudflared tunnel login
+   ```
+
+   This will open a browser where you must log into your Cloudflare account and authorize `cloudflared`.
+
+3. **Create a new Cloudflare Tunnel**
+
+   ```sh
+   cloudflared tunnel create my-tunnel
+   ```
+
+   Replace `my-tunnel` with a name of your choice.
+
+4. **Configure the Tunnel**
+
+   ```sh
+   sudo mkdir -p /etc/cloudflared
+   sudo nano /etc/cloudflared/config.yml
+   ```
+
+   Add the following:
+
+   ```yaml
+   tunnel: my-tunnel
+   credentials-file: /root/.cloudflared/my-tunnel.json
+
+   ingress:
+     - hostname: yourdomain.com
+       service: http://localhost:5555
+     - service: http_status:404
+   ```
+
+   Replace `yourdomain.com` with your actual domain.
+
+5. **Run the Tunnel**
+
+   ```sh
+   cloudflared tunnel run my-tunnel
+   ```
+
+   To run it as a service:
+
+   ```sh
+   sudo cloudflared service install
+   sudo systemctl start cloudflared
+   sudo systemctl enable cloudflared
+   ```
+
+## Running the Server
 
 1. Clone the repository:
 
-    ```sh
-    git clone https://github.com/ewanc26/knotted-docker.git
-    cd knotted-docker
-    ```
+   ```sh
+   git clone https://github.com/ewanc26/knotted-docker.git
+   cd knotted-docker
+   ```
 
-2. Edit `.local.env` to point to your local server's hostname and update the secret:
+2. Edit `.local.env` to specify your local server's hostname and update the secret:
 
-    ```env
-    KNOT_SERVER_HOSTNAME=your.local.server
-    KNOT_SERVER_SECRET=your_secret
-    ```
+   ```env
+   KNOT_SERVER_HOSTNAME=your.local.server
+   KNOT_SERVER_SECRET=your_secret
+   ```
+
+   **Security Note:** Do not hardcode sensitive information in `.local.env` if you plan to share your repository. Consider adding `.local.env` to `.gitignore` to prevent accidental exposure.
 
 3. Build and run the Docker containers in the background using `docker compose`:
 
-    ```sh
-    docker compose up --build -d
-    ```
+   ```sh
+   docker compose up --build -d
+   ```
 
-4. The server will be accessible on the ports defined in the `docker-compose.yml` file:
-    - Knot Server: `http://your.local.server:5555`
-    - Internal Listen Address: `127.0.0.1:5444`
+4. Access the server on the ports defined in the `docker-compose.yml` file:
+   - Knot Server: `http://your.local.server:5555`
+   - Internal Listen Address: `127.0.0.1:5444`
 
-### If routing through a Cloudflare Tunnel
+### Routing Through a Cloudflare Tunnel
 
-5. Access the server through your existing Cloudflare Tunnel:
-    - Ensure your Cloudflare Tunnel is configured to route traffic to `http://your.local.server:5555`.
-    - Access your server via the Cloudflare Tunnel URL you have set up.
+1. Ensure your Cloudflare Tunnel routes traffic to `http://your.local.server:5555`.
+2. Access your server via the Cloudflare Tunnel URL you have set up.
+
+### Configuring SSH for Git via Cloudflare Tunnel
+
+1. Set up SSH for Git to work through your Cloudflare Tunnel:
+
+   - Configure your Cloudflare Tunnel to route traffic to your SSH server (typically running on port 22).
+   - Add a new service in your Cloudflare Tunnel configuration for SSH. For example, if your SSH server runs on `localhost:22`, you can add a service like this:
+
+   ```sh
+   cloudflared tunnel route dns <tunnel-name> git.yourdomain.com
+   ```
+
+   - Update your SSH configuration by editing your `~/.ssh/config` file to include:
+
+   ```ssh
+   Host git.yourdomain.com
+       HostName git.yourdomain.com
+       User git
+       Port 22
+       ProxyCommand cloudflared access ssh --hostname %h
+   ```
+
+   - Replace `git.yourdomain.com` with the hostname configured in your Cloudflare Tunnel.
+
+2. Update your Git remote URL to use the configured Cloudflare Tunnel:
+
+   ```sh
+   git remote set-url origin ssh://git@git.yourdomain.com:22/your/repo.git
+   ```
+
+   - Replace `git.yourdomain.com` with your configured hostname and `your/repo.git` with your repository path.
+
+3. Clone your Git repository via SSH using the Cloudflare Tunnel:
+
+   ```sh
+   git clone ssh://git@git.yourdomain.com:22/your/repo.git
+   ```
 
 ## Troubleshooting
 
-If you encounter an `Already registered` error on the domain, follow these steps to resolve it:
+### Resolving `Already registered` Error
 
-1. List running Docker containers:
+1. **List running Docker containers:**
 
-    ```sh
-    docker ps
-    ```
+   ```sh
+   docker ps
+   ```
 
-    Example output:
+2. **Check the contents of the `/knot` directory inside the running container:**
 
-    ```log
-    CONTAINER ID   IMAGE                            COMMAND                  CREATED          STATUS                  PORTS                                                                                      NAMES
-    abcdef123456   knotted-docker-knot              "/usr/local/bin/knot…"   24 seconds ago   Up 7 seconds            0.0.0.0:5444->5444/tcp, [::]:5444->5444/tcp, 0.0.0.0:5555->5555/tcp, [::]:5555->5555/tcp   knotted-docker-knot-1
-    ```
+   ```sh
+   docker exec -it <container_id> ls -l /knot
+   ```
 
-2. Execute a command inside the running container to list the contents of the `/knot` directory:
+3. **Stop and remove the container:**
 
-    ```sh
-    docker exec -it <container_id> ls -l /knot
-    ```
+   ```sh
+   docker stop <container_id>
+   docker rm <container_id>
+   ```
 
-    Example output:
+4. **Remove the Docker volume to clear persistent data:**
 
-    ```log
-    total 136
-    drwxr-xr-x 2 git  git   4096 Mar 10 20:32 git
-    -rw-r--r-- 1 root root  4096 Mar 10 20:32 knotserver.db
-    -rw-r--r-- 1 root root 32768 Mar 10 21:53 knotserver.db-shm
-    -rw-r--r-- 1 root root 94792 Mar 10 20:34 knotserver.db-wal
-    ```
+   ```sh
+   docker volume rm knotted-docker_knot_data
+   ```
 
-3. Stop and remove the container:
+5. **Rebuild and restart the Docker containers:**
 
-    ```sh
-    docker stop <container_id>
-    docker rm <container_id>
-    ```
+   ```sh
+   docker compose up --build -d
+   ```
 
-4. Remove the Docker volume:
-
-    ```sh
-    docker volume rm knotted-docker_knot_data
-    ```
-
-5. Rebuild and restart the Docker containers:
-
-    ```sh
-    docker compose up --build -d
-    ```
-
-These steps should help resolve the `Already registered` error on the domain.
+Following these steps should resolve the `Already registered` error and allow you to restart the Knot server successfully.
