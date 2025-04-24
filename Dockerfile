@@ -6,7 +6,7 @@ WORKDIR /src
 RUN git clone "https://tangled.sh/@tangled.sh/core"
 
 WORKDIR /src/core
-RUN git checkout a3228d8d0811855feafae3b9a23ef953f3f665bd
+RUN git checkout b471dd661eb8176b1bc835c4a08bb7ff4d46b145
 
 RUN export CGO_ENABLED=1 && \
     go build -o knot ./cmd/knotserver && \
