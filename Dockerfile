@@ -3,9 +3,10 @@ FROM golang:1.23 AS builder
 
 WORKDIR /src
 
-RUN git clone https://tangled.sh/@tangled.sh/core
+RUN git clone "https://tangled.sh/@tangled.sh/core"
 
 WORKDIR /src/core
+RUN git checkout b471dd661eb8176b1bc835c4a08bb7ff4d46b145
 
 RUN export CGO_ENABLED=1 && \
     go build -o knot ./cmd/knotserver && \
