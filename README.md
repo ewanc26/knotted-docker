@@ -143,6 +143,10 @@
    git clone ssh://git@git.yourdomain.com:22/your/repo.git
    ```
 
+## ☕ Support
+
+If you found this useful, consider [buying me a ko-fi](https://ko-fi.com/ewancroft)!
+
 ## Troubleshooting
 
 ### Resolving `Already registered` Error
